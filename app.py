@@ -39,6 +39,7 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 	now = datetime.now(tz).isoformat()
+	print(now,event.source.type)
 	line_bot_api.reply_message(event.reply_token,TextSendMessage(text=str(now)))
 
 if __name__ == "__main__":
