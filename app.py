@@ -1,7 +1,7 @@
 import os
 import time
 import pytz
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 from dateutil.parser import parse
 from googleapiclient.discovery import build
 from httplib2 import Http
@@ -36,11 +36,71 @@ def callback():
 
     return 'OK'
 
+def getEventsCalendar(timeNow): 
+	#returns array of events, index 0 = upcoming events, 1 = ongoing events
+	SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
+	try:
+		store = file.Storage('static/token.json')
+	except:
+		print('Error: token.json not found')
+	try:
+		creds = store.get()
+	except:
+		print('Error: credential invalid/empty')
+	if not creds or creds.invalid:
+	    flow = client.flow_from_clientsecrets('static/credentials.json', SCOPES)
+	    creds = tools.run_flow(flow, store)
+	service = build('calendar', 'v3', http=creds.authorize(Http()))
+
+	events_result = service.events().list(calendarId='std.stei.itb.ac.id_ei3au2vrl6ed3tj4rpvqa3sc10@group.calendar.google.com', 
+										timeMin=timeNow,
+	                                    maxResults=25, singleEvents=True,
+	                                    orderBy='startTime').execute()
+	events = events_result.get('items', [])
+	
+	result = []
+	default = []
+	ongoing = []
+	for event in events:
+		start = parse(event['start'].get('dateTime', event['start'].get('date')))
+		end = parse(event['end'].get('dateTime', event['end'].get('date')))
+		start = start.replace(tzinfo=tz)
+		end = end.replace(tzinfo=tz)
+		if(end-start>timedelta(days=1) and start<=parse(timeNow)):
+			ongoing.append(event)
+		else:
+			default.append(event)
+	result.append(default)
+	result.append(ongoing)
+	return result	
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-	now = datetime.now(tz).isoformat()
-	print(now,event.source.type)
-	line_bot_api.reply_message(event.reply_token,TextSendMessage(text=str(now)))
+	timeNow = datetime.now(tz).isoformat()
+	events = getEventsCalendar(timeNow)
+	replyMessage = []
+	
+	if not events[0]:
+		replyMessage.append('No Upcoming Events')
+	else:
+		replyMessage.append('Upcoming Events\n')
+		for event in events[0]:
+			start = parse(event['start'].get('dateTime', event['start'].get('date')))
+			end = parse(event['end'].get('dateTime', event['end'].get('date')))
+			replyMessage.append(event['summary']).append('\n').append(start.strftime("%a, %-d %b")).append('\n\n')
+	
+	if not events[0]:
+		replyMessage.append('No Ongoing Events')
+	else:
+		replyMessage.append('Ongoing Events')
+		for event in events[1]:
+			start = parse(event['start'].get('dateTime', event['start'].get('date')))
+			end = parse(event['end'].get('dateTime', event['end'].get('date')))
+			replyMessage.append(event['summary']).append('\n').append(start.strftime("%a, %-d %b")).append('\n\n')
+	
+	replyMessage = ''.join(replyMessage)
+
+	line_bot_api.reply_message(event.reply_token,TextSendMessage(text=replyMessage)
 
 if __name__ == "__main__":
 	app.run()
