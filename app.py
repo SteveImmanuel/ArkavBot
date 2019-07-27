@@ -96,7 +96,7 @@ def getEventsCalendar(timeNow):
 
 	events_result = service.events().list(calendarId='std.stei.itb.ac.id_ei3au2vrl6ed3tj4rpvqa3sc10@group.calendar.google.com', 
 										timeMin=timeNow,
-										maxResults=18, singleEvents=True,
+										maxResults=15, singleEvents=True,
 										orderBy='startTime').execute()
 	events = events_result.get('items', [])
 	
@@ -184,78 +184,10 @@ def showAllEvents(events):
 													contents=allContents))
 	return FlexSendMessage(alt_text='All Events',contents=bubleMessage)	
 
-def showUpcomingEvents(events):
-	allContents = []
-
-	if not events:
-		allContents.append(generateTitle('No Upcoming Events'))
-	else:
-		allContents.append(generateTitle('Upcoming Events'))
-		i = 0
-		for event in events:
-			start = parse(event['start'].get('dateTime', event['start'].get('date')))
-			end = parse(event['end'].get('dateTime', event['end'].get('date')))
-			summary = parseSummary(event['summary'])
-			if(i!=0):
-				allContents.append(generateSeparator('separator1'))
-			summaryBox = BoxComponent(layout='horizontal', contents=[
-										generateSummary('summaryTag1',summary[0]),
-										generateSummary('summaryContent',summary[1])
-										])
-			dateTimeContent = [generateDateTime('date',start.strftime('%a, %-d %b'))]
-			if 'dateTime' in event['start']:
-				dateTimeContent.append(generateDateTime('time',start.strftime('%H:%M')+'-'+end.strftime('%H:%M')))
-			dateTimeBox = BoxComponent(layout='horizontal', contents=dateTimeContent)
-			allContents.append(summaryBox)
-			allContents.append(dateTimeBox)
-			i += 1
-	
-	bubleMessage = BubbleContainer(direction='ltr',
-									body=BoxComponent(layout='vertical',
-													spacing='xs',
-													contents=allContents))
-	return FlexSendMessage(alt_text='All Events',contents=bubleMessage)
-
-def showOngoingEvents(events):
-	allContents = []
-
-	if not events:
-		allContents.append(generateTitle('No Ongoing Events'))
-	else:
-		allContents.append(generateTitle('Ongoing Events'))
-		i = 0
-		for event in events:
-			end = parse(event['end'].get('dateTime', event['end'].get('date')))
-			summary = parseSummary(event['summary'])
-			if(i!=0):
-				allContents.append(generateSeparator('separator1'))
-			summaryBox = BoxComponent(layout='horizontal', contents=[
-										generateSummary('summaryTag2',summary[0]),
-										generateSummary('summaryContent',summary[1])
-										])
-			dateTimeContent = [generateDateTime('date',end.strftime('%a, %-d %b'))]
-			if 'dateTime' in event['end']:
-				dateTimeContent.append(generateDateTime('time',end.strftime('%H:%M')))
-			dateTimeBox = BoxComponent(layout='horizontal', contents=dateTimeContent)
-			allContents.append(summaryBox)
-			allContents.append(dateTimeBox)
-			i += 1
-	
-	bubleMessage = BubbleContainer(direction='ltr',
-									body=BoxComponent(layout='vertical',
-													spacing='xs',
-													contents=allContents))
-	return FlexSendMessage(alt_text='All Events',contents=bubleMessage)
-
-
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 	timeNow = datetime.now(tz).isoformat()
 	calendarEvents = getEventsCalendar(timeNow)
-	print(len(calendarEvents[0]))
-	print(len(calendarEvents[1]))
-	upcomingEvents = showUpcomingEvents(calendarEvents[0])
-	ongoingEvents = showOngoingEvents(calendarEvents[1])
 	allEvents = showAllEvents(calendarEvents)
 	
 	line_bot_api.reply_message(event.reply_token, allEvents)
