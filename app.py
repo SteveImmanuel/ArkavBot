@@ -38,19 +38,24 @@ def callback():
 
 def getEventsCalendar(timeNow): 
 	#returns array of events, index 0 = upcoming events, 1 = ongoing events
-	SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
-	try:
-		store = file.Storage('static/token.json')
-	except:
-		print('Error: token.json not found')
-	try:
-		creds = store.get()
-	except:
-		print('Error: credential invalid/empty')
-	if not creds or creds.invalid:
-	    flow = client.flow_from_clientsecrets('static/credentials.json', SCOPES)
-	    creds = tools.run_flow(flow, store)
-	service = build('calendar', 'v3', http=creds.authorize(Http()))
+	SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+	creds = None
+    if os.path.exists('static/token.pickle'):
+        with open('static/token.pickle', 'rb') as token:
+            creds = pickle.load(token)
+			
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                'static/credentials.json', SCOPES)
+            creds = flow.run_local_server(port=0)
+			
+        with open('static/token.pickle', 'wb') as token:
+            pickle.dump(creds, token)
+
+    service = build('calendar', 'v3', http=creds.authorize(Http()))
 
 	events_result = service.events().list(calendarId='std.stei.itb.ac.id_ei3au2vrl6ed3tj4rpvqa3sc10@group.calendar.google.com', 
 										timeMin=timeNow,
