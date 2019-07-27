@@ -87,7 +87,7 @@ def handle_message(event):
 		for event in events[0]:
 			start = parse(event['start'].get('dateTime', event['start'].get('date')))
 			end = parse(event['end'].get('dateTime', event['end'].get('date')))
-			replyMessage.append(event['summary']).append('\n').append(start.strftime("%a, %-d %b")).append('\n\n')
+			replyMessage.append(event['summary']).append('\n').append(start.strftime('%a, %-d %b')).append('\n\n')
 	
 	if not events[0]:
 		replyMessage.append('No Ongoing Events')
@@ -96,11 +96,10 @@ def handle_message(event):
 		for event in events[1]:
 			start = parse(event['start'].get('dateTime', event['start'].get('date')))
 			end = parse(event['end'].get('dateTime', event['end'].get('date')))
-			replyMessage.append(event['summary']).append('\n').append(start.strftime("%a, %-d %b")).append('\n\n')
+			replyMessage.append(event['summary']).append('\n').append(start.strftime('%a, %-d %b')).append('\n\n')
 	
 	replyMessage = ''.join(replyMessage)
-
-	line_bot_api.reply_message(event.reply_token,TextSendMessage(text=replyMessage)
+	line_bot_api.reply_message(event.reply_token,TextSendMessage(text=replyMessage))
 
 if __name__ == "__main__":
 	app.run()
