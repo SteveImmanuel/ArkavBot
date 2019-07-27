@@ -127,62 +127,62 @@ def parseSummary(text):
 		result.append(text[endIdx+2:])
 	return result
 
-# def showAllEvents(events):
-# 	allContents = []
+def showAllEvents(events):
+	allContents = []
 
-# 	if not events[0]:
-# 		allContents.append(generateTitle('No Upcoming Events'))
-# 	else:
-# 		allContents.append(generateTitle('Upcoming Events'))
-# 		i = 0
-# 		for event in events[0]:
-# 			start = parse(event['start'].get('dateTime', event['start'].get('date')))
-# 			end = parse(event['end'].get('dateTime', event['end'].get('date')))
-# 			summary = parseSummary(event['summary'])
-# 			if(i!=0):
-# 				allContents.append(generateSeparator('separator1'))
-# 			summaryBox = BoxComponent(layout='horizontal', contents=[
-# 										generateSummary('summaryTag1',summary[0]),
-# 										generateSummary('summaryContent',summary[1])
-# 										])
-# 			dateTimeContent = [generateDateTime('date',start.strftime('%a, %-d %b'))]
-# 			if 'dateTime' in event['start']:
-# 				dateTimeContent.append(generateDateTime('time',start.strftime('%H:%M')+'-'+end.strftime('%H:%M')))
-# 			dateTimeBox = BoxComponent(layout='horizontal', contents=dateTimeContent)
-# 			allContents.append(summaryBox)
-# 			allContents.append(dateTimeBox)
-# 			i+=1
+	if not events[0]:
+		allContents.append(generateTitle('No Upcoming Events'))
+	else:
+		allContents.append(generateTitle('Upcoming Events'))
+		i = 0
+		for event in events[0]:
+			start = parse(event['start'].get('dateTime', event['start'].get('date')))
+			end = parse(event['end'].get('dateTime', event['end'].get('date')))
+			summary = parseSummary(event['summary'])
+			if(i!=0):
+				allContents.append(generateSeparator('separator1'))
+			summaryBox = BoxComponent(layout='horizontal', contents=[
+										generateSummary('summaryTag1',summary[0]),
+										generateSummary('summaryContent',summary[1])
+										])
+			dateTimeContent = [generateDateTime('date',start.strftime('%a, %-d %b'))]
+			if 'dateTime' in event['start']:
+				dateTimeContent.append(generateDateTime('time',start.strftime('%H:%M')+'-'+end.strftime('%H:%M')))
+			dateTimeBox = BoxComponent(layout='horizontal', contents=dateTimeContent)
+			allContents.append(summaryBox)
+			allContents.append(dateTimeBox)
+			i+=1
 	
-# 	allContents.append(generateSeparator('separator2'))
+	allContents.append(generateSeparator('separator2'))
 
-# 	if not events[1]:
-# 		allContents.append(generateTitle('No Ongoing Events'))
-# 	else:
-# 		allContents.append(generateTitle('Ongoing Events'))
-# 		i = 0
-# 		for event in events[0]:
-# 			start = parse(event['start'].get('dateTime', event['start'].get('date')))
-# 			end = parse(event['end'].get('dateTime', event['end'].get('date')))
-# 			summary = parseSummary(event['summary'])
-# 			if(i!=0):
-# 				allContents.append(generateSeparator('separator1'))
-# 			summaryBox = BoxComponent(layout='horizontal', contents=[
-# 										generateSummary('summaryTag2',summary[0]),
-# 										generateSummary('summaryContent',summary[1])
-# 										])
-# 			dateTimeContent = [generateDateTime('date',end.strftime('%a, %-d %b'))]
-# 			if 'dateTime' in event['end']:
-# 				dateTimeContent.append(generateDateTime('time',end.strftime('%H:%M')))
-# 			dateTimeBox = BoxComponent(layout='horizontal', contents=dateTimeContent)
-# 			allContents.append(summaryBox)
-# 			allContents.append(dateTimeBox)
-# 			i+=1
+	if not events[1]:
+		allContents.append(generateTitle('No Ongoing Events'))
+	else:
+		allContents.append(generateTitle('Ongoing Events'))
+		i = 0
+		for event in events[0]:
+			start = parse(event['start'].get('dateTime', event['start'].get('date')))
+			end = parse(event['end'].get('dateTime', event['end'].get('date')))
+			summary = parseSummary(event['summary'])
+			if(i!=0):
+				allContents.append(generateSeparator('separator1'))
+			summaryBox = BoxComponent(layout='horizontal', contents=[
+										generateSummary('summaryTag2',summary[0]),
+										generateSummary('summaryContent',summary[1])
+										])
+			dateTimeContent = [generateDateTime('date',end.strftime('%a, %-d %b'))]
+			if 'dateTime' in event['end']:
+				dateTimeContent.append(generateDateTime('time',end.strftime('%H:%M')))
+			dateTimeBox = BoxComponent(layout='horizontal', contents=dateTimeContent)
+			allContents.append(summaryBox)
+			allContents.append(dateTimeBox)
+			i+=1
 	
-# 	bubleMessage = BubbleContainer(direction='ltr',
-# 									body=BoxComponent(layout='vertical',
-# 													spacing='xs',
-# 													contents=allContents))
-# 	return FlexSendMessage(alt_text='All Events',contents=bubleMessage)	
+	bubleMessage = BubbleContainer(direction='ltr',
+									body=BoxComponent(layout='vertical',
+													spacing='xs',
+													contents=allContents))
+	return FlexSendMessage(alt_text='All Events',contents=bubleMessage)	
 
 def showUpcomingEvents(events):
 	allContents = []
@@ -256,9 +256,9 @@ def handle_message(event):
 	print(len(calendarEvents[1]))
 	upcomingEvents = showUpcomingEvents(calendarEvents[0])
 	ongoingEvents = showOngoingEvents(calendarEvents[1])
+	allEvents = showAllEvents(calendarEvents)
 	
-	line_bot_api.reply_message(event.reply_token, upcomingEvents)
-	line_bot_api.push_message(event.source.user_id, ongoingEvents)
+	line_bot_api.reply_message(event.reply_token, allEvents)
 
 if __name__ == "__main__":
 	app.run()
