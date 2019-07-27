@@ -110,7 +110,7 @@ def showAllEvents(events, sourceType):
 	if not events[0]:
 		allContents.append(generateTextComponent('No Upcoming Events',jsonObj['title']))
 	else:
-		allContents.append(generateTextComponent('No Upcoming Events',jsonObj['title']))
+		allContents.append(generateTextComponent('Upcoming Events',jsonObj['title']))
 		i = 0
 		for event in events[0]:
 			start = parse(event['start'].get('dateTime', event['start'].get('date')))
