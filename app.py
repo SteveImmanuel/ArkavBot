@@ -2,6 +2,7 @@ import os
 import time
 import pytz
 import pickle
+import itertools
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 from googleapiclient.discovery import build
@@ -80,6 +81,12 @@ def getEventsCalendar(timeNow):
     result.append(ongoing)
     return result	
 
+def multipleAppend(*args):
+    result = []
+    for arg in args:
+        result.append(arg)
+    return result
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     timeNow = datetime.now(tz).isoformat()
@@ -93,7 +100,7 @@ def handle_message(event):
         for event in events[0]:
             start = parse(event['start'].get('dateTime', event['start'].get('date')))
             end = parse(event['end'].get('dateTime', event['end'].get('date')))
-            replyMessage.append(event['summary']).append('\n').append(start.strftime('%a, %-d %b')).append('\n\n')
+            replyMessage = itertools.chain(replyMessage, multipleAppend(event['summary'],'\n',start.strftime('%a, %-d %b'),'\n\n'))
     
     if not events[0]:
         replyMessage.append('No Ongoing Events')
@@ -102,7 +109,7 @@ def handle_message(event):
         for event in events[1]:
             start = parse(event['start'].get('dateTime', event['start'].get('date')))
             end = parse(event['end'].get('dateTime', event['end'].get('date')))
-            replyMessage.append(event['summary']).append('\n').append(start.strftime('%a, %-d %b')).append('\n\n')
+            replyMessage = itertools.chain(replyMessage, multipleAppend(event['summary'],'\n',start.strftime('%a, %-d %b'),'\n\n'))
     
     replyMessage = ''.join(replyMessage)
     line_bot_api.reply_message(event.reply_token,TextSendMessage(text=replyMessage))
