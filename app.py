@@ -190,7 +190,7 @@ def showEventDetail(event,type):
 	bubbleMessage = BubbleContainer(direction='ltr',body=BoxComponent(layout='vertical',
 													spacing='xs',
 													contents=detailContents))
-	return FlexSendMessage(alt_text='All Events',contents=bubbleMessage)													
+	return FlexSendMessage(alt_text='Detail Event',contents=bubbleMessage)													
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
