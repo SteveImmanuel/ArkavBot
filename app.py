@@ -180,7 +180,7 @@ def showEventDetail(event,type):
 	detailContents.append(startDateBox)
 
 	detailContents.append(generateTextComponent('End Time:',jsonObj['detailText']))
-	endDateContent = [generateTextComponent(start.strftime('%a, %-d %b'),jsonObj['detailDate'])]
+	endDateContent = [generateTextComponent(end.strftime('%a, %-d %b'),jsonObj['detailDate'])]
 	if 'dateTime' in event['end']:
 		endDateContent.append(generateTextComponent(end.strftime('%H:%M'),jsonObj['detailTime']))
 	endDateBox = BoxComponent(layout='horizontal',contents=endDateContent)
