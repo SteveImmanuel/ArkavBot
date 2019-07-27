@@ -17,9 +17,6 @@ from linebot.models import *
 channel_secret = os.getenv('CHANNEL_SECRET', None)
 channel_access_token = os.getenv('CHANNEL_ACCESS', None)
 
-# channel_access_token='Jj/jv56P7ZEREEIQ5zZ6SmSYksi14BFFLyFDSPjIBxjP4At1nGzaB6PAPxTux55BVVBGC8+SA1aHssHTVfVs3EgADnOIGqWwPuVWay01R/qP9XVv5wy60dmzKIEP3nrJYa4waIfzrHW+bddcYrfJxgdB04t89/1O/w1cDnyilFU='
-# channel_secret='4d29fcb0bc85d329492c2fc90fe9986c'
-
 line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
 tz=pytz.timezone('Asia/Jakarta')
@@ -44,38 +41,14 @@ def callback():
 
 	return 'OK'
 
-def generateTitle(title):
-	return TextComponent(text=title,
-						size=jsonObj['title'].get('size'),
-						align=jsonObj['title'].get('align'),
-						gravity=jsonObj['title'].get('gravity'),
-						weight=jsonObj['title'].get('weight'),
-						color=jsonObj['title'].get('color')                   
-						)
+def generateTextComponent(textContent,dictionary,source=None,postData=None):
+	postAction = None
+	if(source=='user'):
+		postAction = PostbackAction(label='detail',data=postData)
+	return TextComponent(text=textContent,**dictionary,action=postAction)
 
-def generateSummary(type,content):
-	return TextComponent(text=content,
-						flex=jsonObj[type].get('flex'),
-						size=jsonObj[type].get('size'),
-						margin=jsonObj[type].get('margin'),
-						align=jsonObj[type].get('align'),
-						gravity=jsonObj[type].get('gravity'),
-						weight=jsonObj[type].get('weight'),
-						color=jsonObj[type].get('color'),   
-						wrap=jsonObj[type].get('wrap')                
-						)
-
-def generateDateTime(type,content):
-	return TextComponent(text=content,
-						size=jsonObj[type].get('size'),
-						align=jsonObj[type].get('align'),
-						color=jsonObj[type].get('color'),               
-						)
-
-def generateSeparator(type):
-	return SeparatorComponent(margin=jsonObj[type].get('margin'),
-							color=jsonObj[type].get('color')
-							)
+def generateSeparator(dictionary):
+	return SeparatorComponent(**dictionary)
 
 def getEventsCalendar(timeNow): 
 	#returns array of events, index 0 = upcoming events, 1 = ongoing events
@@ -100,7 +73,7 @@ def getEventsCalendar(timeNow):
 
 	events_result = service.events().list(calendarId='std.stei.itb.ac.id_ei3au2vrl6ed3tj4rpvqa3sc10@group.calendar.google.com', 
 										timeMin=timeNow,
-										maxResults=17, singleEvents=True,
+										maxResults=15, singleEvents=True,
 										orderBy='startTime').execute()
 	events = events_result.get('items', [])
 	
@@ -131,70 +104,114 @@ def parseSummary(text):
 		result.append(text[endIdx+2:])
 	return result
 
-def showAllEvents(events):
+def showAllEvents(events, sourceType):
 	allContents = []
 
 	if not events[0]:
-		allContents.append(generateTitle('No Upcoming Events'))
+		allContents.append(generateTextComponent('No Upcoming Events',jsonObj['title']))
 	else:
-		allContents.append(generateTitle('Upcoming Events'))
+		allContents.append(generateTextComponent('No Upcoming Events',jsonObj['title']))
 		i = 0
 		for event in events[0]:
 			start = parse(event['start'].get('dateTime', event['start'].get('date')))
 			end = parse(event['end'].get('dateTime', event['end'].get('date')))
 			summary = parseSummary(event['summary'])
 			if(i!=0):
-				allContents.append(generateSeparator('separator1'))
+				allContents.append(generateSeparator(jsonObj['separator1']))
 			summaryBox = BoxComponent(layout='horizontal', contents=[
-										generateSummary('summaryTag1',summary[0]),
-										generateSummary('summaryContent',summary[1])
+										generateTextComponent(summary[0],jsonObj['summaryTag1']),
+										generateTextComponent(summary[1],jsonObj['summaryContent'],source=sourceType,postData='0 '+str(i))
 										])
-			dateTimeContent = [generateDateTime('date',start.strftime('%a, %-d %b'))]
+			dateTimeContent = [generateTextComponent(start.strftime('%a, %-d %b'),jsonObj['date'])]
 			if 'dateTime' in event['start']:
-				dateTimeContent.append(generateDateTime('time',start.strftime('%H:%M')+'-'+end.strftime('%H:%M')))
+				dateTimeContent.append(generateTextComponent(start.strftime('%H:%M')+'-'+end.strftime('%H:%M'),jsonObj['time']))
 			dateTimeBox = BoxComponent(layout='horizontal', contents=dateTimeContent)
 			allContents.append(summaryBox)
 			allContents.append(dateTimeBox)
 			i+=1
 	
-	allContents.append(generateSeparator('separator2'))
+	allContents.append(generateSeparator(jsonObj['separator2']))
 
 	if not events[1]:
-		allContents.append(generateTitle('No Ongoing Events'))
+		allContents.append(generateTextComponent('No Ongoing Events',jsonObj['title']))
 	else:
-		allContents.append(generateTitle('Ongoing Events'))
+		allContents.append(generateTextComponent('Ongoing Events',jsonObj['title']))
 		i = 0
 		for event in events[1]:
 			start = parse(event['start'].get('dateTime', event['start'].get('date')))
 			end = parse(event['end'].get('dateTime', event['end'].get('date')))
 			summary = parseSummary(event['summary'])
 			if(i!=0):
-				allContents.append(generateSeparator('separator1'))
+				allContents.append(generateSeparator(jsonObj['separator1']))
 			summaryBox = BoxComponent(layout='horizontal', contents=[
-										generateSummary('summaryTag2',summary[0]),
-										generateSummary('summaryContent',summary[1])
+										generateTextComponent(summary[0],jsonObj['summaryTag2']),
+										generateTextComponent(summary[1],jsonObj['summaryContent'],source=sourceType,postData='1 '+str(i))
 										])
-			dateTimeContent = [generateDateTime('date',end.strftime('%a, %-d %b'))]
+			dateTimeContent = [generateTextComponent(end.strftime('%a, %-d %b'),jsonObj['date'])]
 			if 'dateTime' in event['end']:
-				dateTimeContent.append(generateDateTime('time',end.strftime('%H:%M')))
+				dateTimeContent.append(generateTextComponent(end.strftime('%H:%M'),jsonObj['time']))
 			dateTimeBox = BoxComponent(layout='horizontal', contents=dateTimeContent)
 			allContents.append(summaryBox)
 			allContents.append(dateTimeBox)
 			i+=1
 	
-	bubleMessage = BubbleContainer(direction='ltr',
+	bubbleMessage = BubbleContainer(direction='ltr',
 									body=BoxComponent(layout='vertical',
 													spacing='xs',
 													contents=allContents))
-	return FlexSendMessage(alt_text='All Events',contents=bubleMessage)	
+	return FlexSendMessage(alt_text='All Events',contents=bubbleMessage)
+
+def showEventDetail(event,type):
+	detailContents = []
+	summary = parseSummary(event['summary'])
+	start = parse(event['start'].get('dateTime', event['start'].get('date')))
+	end = parse(event['end'].get('dateTime', event['end'].get('date')))
+
+	key = 'detailTag'+str(type)
+	detailContents.append(generateTextComponent(summary[0],jsonObj[key]))
+	detailContents.append(generateTextComponent(summary[1],jsonObj['detailTitle']))
+	detailContents.append(generateSeparator(jsonObj['separator3']))
+	
+	detailContents.append(generateTextComponent('Start Time:',jsonObj['detailText']))
+	startDateContent = [generateTextComponent(start.strftime('%a, %-d %b'),jsonObj['detailDate'])]
+	if 'dateTime' in event['start']:
+		startDateContent.append(generateTextComponent(start.strftime('%H:%M'),jsonObj['detailTime']))
+	startDateBox = BoxComponent(layout='horizontal',contents=startDateContent)
+	detailContents.append(startDateBox)
+
+	detailContents.append(generateTextComponent('End Time:',jsonObj['detailText']))
+	endDateContent = [generateTextComponent(start.strftime('%a, %-d %b'),jsonObj['detailDate'])]
+	if 'dateTime' in event['end']:
+		endDateContent.append(generateTextComponent(end.strftime('%H:%M'),jsonObj['detailTime']))
+	endDateBox = BoxComponent(layout='horizontal',contents=endDateContent)
+	detailContents.append(endDateBox)
+
+	detailContents.append(generateTextComponent(event.get('description','-'),jsonObj['detailContent']))
+	bubbleMessage = BubbleContainer(direction='ltr',body=BoxComponent(layout='vertical',
+													spacing='xs',
+													contents=detailContents))
+	return FlexSendMessage(alt_text='All Events',contents=bubbleMessage)													
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 	timeNow = datetime.now(tz).isoformat()
 	calendarEvents = getEventsCalendar(timeNow)
-	allEvents = showAllEvents(calendarEvents)
-	
-	line_bot_api.reply_message(event.reply_token, allEvents)
+	if event.message.text == '/calendar':
+		allEvents = showAllEvents(calendarEvents,event.source.type)
+		line_bot_api.reply_message(event.reply_token, allEvents)
+
+@handler.add(PostbackEvent)
+def handle_postback(event):
+	timeNow = datetime.now(tz).isoformat()
+	calendarEvents = getEventsCalendar(timeNow)
+	data = event.postback.data.split()
+	data = list(map(int, data))
+	print(str(data))
+	if len(data)==2:
+		detailEvent = showEventDetail(calendarEvents[data[0]][data[1]],data[0])
+		line_bot_api.reply_message(event.reply_token, detailEvent)
+	else:
+		print('Error: Invalid Postback Data')
 
 if __name__ == "__main__":
 	app.run()
