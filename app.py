@@ -96,7 +96,7 @@ def getEventsCalendar(timeNow):
 
 	events_result = service.events().list(calendarId='std.stei.itb.ac.id_ei3au2vrl6ed3tj4rpvqa3sc10@group.calendar.google.com', 
 										timeMin=timeNow,
-										maxResults=25, singleEvents=True,
+										maxResults=9, singleEvents=True,
 										orderBy='startTime').execute()
 	events = events_result.get('items', [])
 	
