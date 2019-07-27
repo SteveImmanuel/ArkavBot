@@ -91,27 +91,26 @@ def multipleAppend(*args):
 def handle_message(event):
     timeNow = datetime.now(tz).isoformat()
     events = getEventsCalendar(timeNow)
-    replyMessage = []
+    replyMessage = ''
     
     if not events[0]:
-        replyMessage.append('No Upcoming Events')
+        replyMessage += ('No Upcoming Events')
     else:
-        replyMessage.append('Upcoming Events\n')
+        replyMessage += ('Upcoming Events\n')
         for event in events[0]:
             start = parse(event['start'].get('dateTime', event['start'].get('date')))
             end = parse(event['end'].get('dateTime', event['end'].get('date')))
-            replyMessage = itertools.chain(replyMessage, multipleAppend(event['summary'],'\n',start.strftime('%a, %-d %b'),'\n\n'))
+            replyMessage += event['summary']+'\n'+start.strftime('%a, %-d %b')+'\n\n'
     
     if not events[0]:
-        replyMessage.append('No Ongoing Events')
+        replyMessage += ('No Ongoing Events')
     else:
-        replyMessage.append('Ongoing Events')
+        replyMessage += ('Ongoing Events')
         for event in events[1]:
             start = parse(event['start'].get('dateTime', event['start'].get('date')))
             end = parse(event['end'].get('dateTime', event['end'].get('date')))
-            replyMessage = itertools.chain(replyMessage, multipleAppend(event['summary'],'\n',start.strftime('%a, %-d %b'),'\n\n'))
+            replyMessage += event['summary']+'\n'+start.strftime('%a, %-d %b')+'\n\n'
     
-    replyMessage = ''.join(replyMessage)
     line_bot_api.reply_message(event.reply_token,TextSendMessage(text=replyMessage))
 
 if __name__ == "__main__":
