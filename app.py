@@ -96,7 +96,7 @@ def getEventsCalendar(timeNow):
 
 	events_result = service.events().list(calendarId='std.stei.itb.ac.id_ei3au2vrl6ed3tj4rpvqa3sc10@group.calendar.google.com', 
 										timeMin=timeNow,
-										maxResults=10, singleEvents=True,
+										maxResults=18, singleEvents=True,
 										orderBy='startTime').execute()
 	events = events_result.get('items', [])
 	
@@ -258,7 +258,7 @@ def handle_message(event):
 	ongoingEvents = showOngoingEvents(calendarEvents[1])
 	
 	line_bot_api.reply_message(event.reply_token, upcomingEvents)
-	line_bot_api.reply_message(event.reply_token, ongoingEvents)
+	line_bot_api.push_message(event.source.user_id, ongoingEvents)
 
 if __name__ == "__main__":
 	app.run()
