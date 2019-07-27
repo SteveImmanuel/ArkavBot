@@ -56,7 +56,7 @@ def getEventsCalendar(timeNow):
         with open('static/token.pickle', 'wb') as token:
             pickle.dump(creds, token)
 
-    service = build('calendar', 'v3', http=creds.authorize(Http()))
+    service = build('calendar', 'v3', credentials=creds)
 
     events_result = service.events().list(calendarId='std.stei.itb.ac.id_ei3au2vrl6ed3tj4rpvqa3sc10@group.calendar.google.com', 
                                         timeMin=timeNow,
