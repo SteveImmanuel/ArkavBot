@@ -90,27 +90,29 @@ def multipleAppend(*args):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     timeNow = datetime.now(tz).isoformat()
-    events = getEventsCalendar(timeNow)
+    calendarEvents = getEventsCalendar(timeNow)
     replyMessage = ''
     
-    if not events[0]:
+    if not calendarEvents[0]:
         replyMessage += ('No Upcoming Events')
     else:
         replyMessage += ('Upcoming Events\n')
-        for event in events[0]:
-            start = parse(event['start'].get('dateTime', event['start'].get('date')))
-            end = parse(event['end'].get('dateTime', event['end'].get('date')))
-            replyMessage += event['summary']+'\n'+start.strftime('%a, %-d %b')+'\n\n'
+        for calendarEvent in calendarEvents[0]:
+            start = parse(calendarEvent['start'].get('dateTime', calendarEvent['start'].get('date')))
+            end = parse(calendarEvent['end'].get('dateTime', calendarEvent['end'].get('date')))
+            replyMessage += calendarEvent['summary']+'\n'+start.strftime('%a, %-d %b')+'\n\n'
     
-    if not events[0]:
+    if not calendarEvents[0]:
         replyMessage += ('No Ongoing Events')
     else:
         replyMessage += ('Ongoing Events')
-        for event in events[1]:
-            start = parse(event['start'].get('dateTime', event['start'].get('date')))
-            end = parse(event['end'].get('dateTime', event['end'].get('date')))
-            replyMessage += event['summary']+'\n'+start.strftime('%a, %-d %b')+'\n\n'
+        for calendarEvent in calendarEvents[1]:
+            start = parse(calendarEvent['start'].get('dateTime', calendarEvent['start'].get('date')))
+            end = parse(calendarEvent['end'].get('dateTime', calendarEvent['end'].get('date')))
+            replyMessage += calendarEvent['summary']+'\n'+start.strftime('%a, %-d %b')+'\n\n'
     
+    print(replyMessage)
+    print(event.reply_token)
     line_bot_api.reply_message(event.reply_token,TextSendMessage(text=replyMessage))
 
 if __name__ == "__main__":
