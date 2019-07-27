@@ -184,7 +184,7 @@ def showAllEvents(events):
 													contents=allContents))
 	return FlexSendMessage(alt_text='All Events',contents=bubleMessage)	
 
-def showUpcomingEvents(event):
+def showUpcomingEvents(events):
 	allContents = []
 
 	if not events:
@@ -225,7 +225,6 @@ def showOngoingEvents(events):
 		allContents.append(generateTitle('Ongoing Events'))
 		i = 0
 		for event in events:
-			start = parse(event['start'].get('dateTime', event['start'].get('date')))
 			end = parse(event['end'].get('dateTime', event['end'].get('date')))
 			summary = parseSummary(event['summary'])
 			if(i!=0):
