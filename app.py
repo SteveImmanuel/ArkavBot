@@ -1,11 +1,12 @@
 import os
 import time
 import pytz
+import pickle
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 from googleapiclient.discovery import build
-from httplib2 import Http
-from oauth2client import file, client, tools
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 from flask import Flask, request, abort
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
