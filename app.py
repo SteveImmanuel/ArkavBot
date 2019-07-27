@@ -96,7 +96,7 @@ def getEventsCalendar(timeNow):
 
 	events_result = service.events().list(calendarId='std.stei.itb.ac.id_ei3au2vrl6ed3tj4rpvqa3sc10@group.calendar.google.com', 
 										timeMin=timeNow,
-										maxResults=20, singleEvents=True,
+										maxResults=10, singleEvents=True,
 										orderBy='startTime').execute()
 	events = events_result.get('items', [])
 	
@@ -252,6 +252,8 @@ def showOngoingEvents(events):
 def handle_message(event):
 	timeNow = datetime.now(tz).isoformat()
 	calendarEvents = getEventsCalendar(timeNow)
+	print(len(calendarEvents[0]))
+	print(len(calendarEvents[1]))
 	upcomingEvents = showUpcomingEvents(calendarEvents[0])
 	ongoingEvents = showOngoingEvents(calendarEvents[1])
 	
