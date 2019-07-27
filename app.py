@@ -16,6 +16,10 @@ from linebot.models import *
 
 channel_secret = os.getenv('CHANNEL_SECRET', None)
 channel_access_token = os.getenv('CHANNEL_ACCESS', None)
+
+# channel_access_token='Jj/jv56P7ZEREEIQ5zZ6SmSYksi14BFFLyFDSPjIBxjP4At1nGzaB6PAPxTux55BVVBGC8+SA1aHssHTVfVs3EgADnOIGqWwPuVWay01R/qP9XVv5wy60dmzKIEP3nrJYa4waIfzrHW+bddcYrfJxgdB04t89/1O/w1cDnyilFU='
+# channel_secret='4d29fcb0bc85d329492c2fc90fe9986c'
+
 line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
 tz=pytz.timezone('Asia/Jakarta')
@@ -96,7 +100,7 @@ def getEventsCalendar(timeNow):
 
 	events_result = service.events().list(calendarId='std.stei.itb.ac.id_ei3au2vrl6ed3tj4rpvqa3sc10@group.calendar.google.com', 
 										timeMin=timeNow,
-										maxResults=13, singleEvents=True,
+										maxResults=15, singleEvents=True,
 										orderBy='startTime').execute()
 	events = events_result.get('items', [])
 	
@@ -160,7 +164,7 @@ def showAllEvents(events):
 	else:
 		allContents.append(generateTitle('Ongoing Events'))
 		i = 0
-		for event in events[0]:
+		for event in events[1]:
 			start = parse(event['start'].get('dateTime', event['start'].get('date')))
 			end = parse(event['end'].get('dateTime', event['end'].get('date')))
 			summary = parseSummary(event['summary'])
